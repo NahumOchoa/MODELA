@@ -1,0 +1,209 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    DO
+    SPECIAL_CHARACTERS
+    TRANSFORMATION
+    URL
+
+Grammar
+
+Rule 0     S' -> expression
+Rule 1     expression -> NUMBER
+Rule 2     expression -> SETTER assign
+Rule 3     expression -> STRING
+Rule 4     expression -> NAME
+Rule 5     assign -> NAME EQUALS expression
+Rule 6     assign -> assign NAME EQUALS expression
+Rule 7     expression -> LOAD DATA FROM FILE
+
+Terminals, with rules where they appear
+
+DATA                 : 7
+DO                   : 
+EQUALS               : 5 6
+FILE                 : 7
+FROM                 : 7
+LOAD                 : 7
+NAME                 : 4 5 6
+NUMBER               : 1
+SETTER               : 2
+SPECIAL_CHARACTERS   : 
+STRING               : 3
+TRANSFORMATION       : 
+URL                  : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+assign               : 2 6
+expression           : 5 6 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . expression
+    (1) expression -> . NUMBER
+    (2) expression -> . SETTER assign
+    (3) expression -> . STRING
+    (4) expression -> . NAME
+    (7) expression -> . LOAD DATA FROM FILE
+
+    NUMBER          shift and go to state 2
+    SETTER          shift and go to state 3
+    STRING          shift and go to state 4
+    NAME            shift and go to state 5
+    LOAD            shift and go to state 6
+
+    expression                     shift and go to state 1
+
+state 1
+
+    (0) S' -> expression .
+
+
+
+state 2
+
+    (1) expression -> NUMBER .
+
+    $end            reduce using rule 1 (expression -> NUMBER .)
+    NAME            reduce using rule 1 (expression -> NUMBER .)
+
+
+state 3
+
+    (2) expression -> SETTER . assign
+    (5) assign -> . NAME EQUALS expression
+    (6) assign -> . assign NAME EQUALS expression
+
+    NAME            shift and go to state 8
+
+    assign                         shift and go to state 7
+
+state 4
+
+    (3) expression -> STRING .
+
+    $end            reduce using rule 3 (expression -> STRING .)
+    NAME            reduce using rule 3 (expression -> STRING .)
+
+
+state 5
+
+    (4) expression -> NAME .
+
+    $end            reduce using rule 4 (expression -> NAME .)
+    NAME            reduce using rule 4 (expression -> NAME .)
+
+
+state 6
+
+    (7) expression -> LOAD . DATA FROM FILE
+
+    DATA            shift and go to state 9
+
+
+state 7
+
+    (2) expression -> SETTER assign .
+    (6) assign -> assign . NAME EQUALS expression
+
+  ! shift/reduce conflict for NAME resolved as shift
+    $end            reduce using rule 2 (expression -> SETTER assign .)
+    NAME            shift and go to state 10
+
+  ! NAME            [ reduce using rule 2 (expression -> SETTER assign .) ]
+
+
+state 8
+
+    (5) assign -> NAME . EQUALS expression
+
+    EQUALS          shift and go to state 11
+
+
+state 9
+
+    (7) expression -> LOAD DATA . FROM FILE
+
+    FROM            shift and go to state 12
+
+
+state 10
+
+    (6) assign -> assign NAME . EQUALS expression
+
+    EQUALS          shift and go to state 13
+
+
+state 11
+
+    (5) assign -> NAME EQUALS . expression
+    (1) expression -> . NUMBER
+    (2) expression -> . SETTER assign
+    (3) expression -> . STRING
+    (4) expression -> . NAME
+    (7) expression -> . LOAD DATA FROM FILE
+
+    NUMBER          shift and go to state 2
+    SETTER          shift and go to state 3
+    STRING          shift and go to state 4
+    NAME            shift and go to state 5
+    LOAD            shift and go to state 6
+
+    expression                     shift and go to state 14
+
+state 12
+
+    (7) expression -> LOAD DATA FROM . FILE
+
+    FILE            shift and go to state 15
+
+
+state 13
+
+    (6) assign -> assign NAME EQUALS . expression
+    (1) expression -> . NUMBER
+    (2) expression -> . SETTER assign
+    (3) expression -> . STRING
+    (4) expression -> . NAME
+    (7) expression -> . LOAD DATA FROM FILE
+
+    NUMBER          shift and go to state 2
+    SETTER          shift and go to state 3
+    STRING          shift and go to state 4
+    NAME            shift and go to state 5
+    LOAD            shift and go to state 6
+
+    expression                     shift and go to state 16
+
+state 14
+
+    (5) assign -> NAME EQUALS expression .
+
+    NAME            reduce using rule 5 (assign -> NAME EQUALS expression .)
+    $end            reduce using rule 5 (assign -> NAME EQUALS expression .)
+
+
+state 15
+
+    (7) expression -> LOAD DATA FROM FILE .
+
+    $end            reduce using rule 7 (expression -> LOAD DATA FROM FILE .)
+    NAME            reduce using rule 7 (expression -> LOAD DATA FROM FILE .)
+
+
+state 16
+
+    (6) assign -> assign NAME EQUALS expression .
+
+    NAME            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
+    $end            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for NAME in state 7 resolved as shift
