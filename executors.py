@@ -3,6 +3,7 @@ import re
 from typing import Any
 import pandas as pd
 from pandas import DataFrame
+from sklearn.preprocessing import MinMaxScaler
 
 
 class AbstractExecutor(abc.ABC):
@@ -76,6 +77,24 @@ class SetExecutor(AbstractExecutor):
         except (IndexError, ValueError) as e:
             print(f"Error executing set command: {str(e)}")
             return self.names
+
+
+class MinMaxExecutor(AbstractExecutor):
+    # Execute the MinMaxScaler preprocessing command
+    def __init__(self, df: DataFrame):
+        """
+        Constructor for the MinMaxExecutor class that receives the DataFrame to preprocess
+        :param df: The DataFrame to preprocess
+        """
+        self.df = df
+
+    def execute(self) -> pd.DataFrame:
+        """
+        Execute the MinMaxScaler preprocessing command and return the preprocessed DataFrame
+        :return: The preprocessed DataFrame
+        """
+        scaler = MinMaxScaler()
+        return pd.DataFrame(scaler.fit_transform(self.df), columns=self.df.columns)
 
 
 class ExecutorFactory:

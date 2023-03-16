@@ -14,8 +14,8 @@ def main():
     parser = ModelaLexer()
     yacc = ModelaYacc()
     yacc.build()
-    parser.tokenize("LOAD DATA FROM FILE(source='prueba.xlsx', type=xlsx)")
-    yacc.parser.parse("LOAD DATA FROM FILE(source='prueba.xlsx', type=xlsx)")
+    parser.tokenize("preprocessing WITH SCALING USING min_max")
+    yacc.parser.parse("preprocessing WITH scaling USING min_max")
 
 
 if __name__ == "__main__":

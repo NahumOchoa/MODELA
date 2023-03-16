@@ -25,6 +25,11 @@ class ModelaLexer:
     t_DO = config.t_DO
     t_LOAD = config.t_LOAD
     t_DATA = config.t_DATA
+    t_TASK = config.t_TASK
+    t_ALGORITHM = config.t_ALGORITHM
+    t_PREPROCESSING = config.t_PREPROCESSING
+    t_WITH = config.t_WITH
+    t_USING = config.t_USING
 
     def t_NUMBER(self, t):
         r"""\d+"""
@@ -32,11 +37,11 @@ class ModelaLexer:
         return t
 
     def t_error(self, t):
-        print("Caracter no valido %s" % t.value[0])
+        print("Caracter no valido %s en la linea %s" % (t.value[0], t.lexer.lineno))
         t.lexer.skip(1)
 
     def __init__(self):
-        self.lexer = lex.lex(module=self)
+        self.lexer = lex.lex(module=self, debug=0)
 
     def tokenize(self, data):
         self.lexer.input(data)
@@ -84,6 +89,12 @@ class ModelaYacc:
         executor = factory.getExecutor("SET", params)
         names_dict = executor.execute()
         self.names["".join(names_dict.keys())] = names_dict["".join(names_dict.keys())]
+
+    def p_statement_preprocessing(self, t):
+        '''expression : PREPROCESSING WITH TASK USING ALGORITHM'''
+        t[0] = f"{t[1]} {t[2]} {t[3]} {t[4]} {t[5]}"
+        print(t[0])
+        print("PREPROCESSING WITH TASK USING ALGORITHM")
 
     def p_statement_load_data(self, t):
         '''expression : LOAD DATA FROM FILE'''

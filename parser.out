@@ -16,23 +16,29 @@ Rule 3     expression -> STRING
 Rule 4     expression -> NAME
 Rule 5     assign -> NAME EQUALS expression
 Rule 6     assign -> assign NAME EQUALS expression
-Rule 7     expression -> LOAD DATA FROM FILE
+Rule 7     expression -> PREPROCESSING WITH TASK USING ALGORITHM
+Rule 8     expression -> LOAD DATA FROM FILE
 
 Terminals, with rules where they appear
 
-DATA                 : 7
+ALGORITHM            : 7
+DATA                 : 8
 DO                   : 
 EQUALS               : 5 6
-FILE                 : 7
-FROM                 : 7
-LOAD                 : 7
+FILE                 : 8
+FROM                 : 8
+LOAD                 : 8
 NAME                 : 4 5 6
 NUMBER               : 1
+PREPROCESSING        : 7
 SETTER               : 2
 SPECIAL_CHARACTERS   : 
 STRING               : 3
+TASK                 : 7
 TRANSFORMATION       : 
 URL                  : 
+USING                : 7
+WITH                 : 7
 error                : 
 
 Nonterminals, with rules where they appear
@@ -49,13 +55,15 @@ state 0
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
-    LOAD            shift and go to state 6
+    PREPROCESSING   shift and go to state 6
+    LOAD            shift and go to state 7
 
     expression                     shift and go to state 1
 
@@ -79,9 +87,9 @@ state 3
     (5) assign -> . NAME EQUALS expression
     (6) assign -> . assign NAME EQUALS expression
 
-    NAME            shift and go to state 8
+    NAME            shift and go to state 9
 
-    assign                         shift and go to state 7
+    assign                         shift and go to state 8
 
 state 4
 
@@ -101,86 +109,111 @@ state 5
 
 state 6
 
-    (7) expression -> LOAD . DATA FROM FILE
+    (7) expression -> PREPROCESSING . WITH TASK USING ALGORITHM
 
-    DATA            shift and go to state 9
+    WITH            shift and go to state 10
 
 
 state 7
+
+    (8) expression -> LOAD . DATA FROM FILE
+
+    DATA            shift and go to state 11
+
+
+state 8
 
     (2) expression -> SETTER assign .
     (6) assign -> assign . NAME EQUALS expression
 
   ! shift/reduce conflict for NAME resolved as shift
     $end            reduce using rule 2 (expression -> SETTER assign .)
-    NAME            shift and go to state 10
+    NAME            shift and go to state 12
 
   ! NAME            [ reduce using rule 2 (expression -> SETTER assign .) ]
 
 
-state 8
-
-    (5) assign -> NAME . EQUALS expression
-
-    EQUALS          shift and go to state 11
-
-
 state 9
 
-    (7) expression -> LOAD DATA . FROM FILE
-
-    FROM            shift and go to state 12
-
-
-state 10
-
-    (6) assign -> assign NAME . EQUALS expression
+    (5) assign -> NAME . EQUALS expression
 
     EQUALS          shift and go to state 13
 
 
+state 10
+
+    (7) expression -> PREPROCESSING WITH . TASK USING ALGORITHM
+
+    TASK            shift and go to state 14
+
+
 state 11
+
+    (8) expression -> LOAD DATA . FROM FILE
+
+    FROM            shift and go to state 15
+
+
+state 12
+
+    (6) assign -> assign NAME . EQUALS expression
+
+    EQUALS          shift and go to state 16
+
+
+state 13
 
     (5) assign -> NAME EQUALS . expression
     (1) expression -> . NUMBER
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
-    LOAD            shift and go to state 6
+    PREPROCESSING   shift and go to state 6
+    LOAD            shift and go to state 7
 
-    expression                     shift and go to state 14
+    expression                     shift and go to state 17
 
-state 12
+state 14
 
-    (7) expression -> LOAD DATA FROM . FILE
+    (7) expression -> PREPROCESSING WITH TASK . USING ALGORITHM
 
-    FILE            shift and go to state 15
+    USING           shift and go to state 18
 
 
-state 13
+state 15
+
+    (8) expression -> LOAD DATA FROM . FILE
+
+    FILE            shift and go to state 19
+
+
+state 16
 
     (6) assign -> assign NAME EQUALS . expression
     (1) expression -> . NUMBER
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
-    LOAD            shift and go to state 6
+    PREPROCESSING   shift and go to state 6
+    LOAD            shift and go to state 7
 
-    expression                     shift and go to state 16
+    expression                     shift and go to state 20
 
-state 14
+state 17
 
     (5) assign -> NAME EQUALS expression .
 
@@ -188,22 +221,37 @@ state 14
     $end            reduce using rule 5 (assign -> NAME EQUALS expression .)
 
 
-state 15
+state 18
 
-    (7) expression -> LOAD DATA FROM FILE .
+    (7) expression -> PREPROCESSING WITH TASK USING . ALGORITHM
 
-    $end            reduce using rule 7 (expression -> LOAD DATA FROM FILE .)
-    NAME            reduce using rule 7 (expression -> LOAD DATA FROM FILE .)
+    ALGORITHM       shift and go to state 21
 
 
-state 16
+state 19
+
+    (8) expression -> LOAD DATA FROM FILE .
+
+    $end            reduce using rule 8 (expression -> LOAD DATA FROM FILE .)
+    NAME            reduce using rule 8 (expression -> LOAD DATA FROM FILE .)
+
+
+state 20
 
     (6) assign -> assign NAME EQUALS expression .
 
     NAME            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
     $end            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
 
+
+state 21
+
+    (7) expression -> PREPROCESSING WITH TASK USING ALGORITHM .
+
+    $end            reduce using rule 7 (expression -> PREPROCESSING WITH TASK USING ALGORITHM .)
+    NAME            reduce using rule 7 (expression -> PREPROCESSING WITH TASK USING ALGORITHM .)
+
 WARNING: 
 WARNING: Conflicts:
 WARNING: 
-WARNING: shift/reduce conflict for NAME in state 7 resolved as shift
+WARNING: shift/reduce conflict for NAME in state 8 resolved as shift
