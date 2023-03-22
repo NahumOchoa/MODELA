@@ -14,6 +14,8 @@ def main():
     parser = ModelaLexer()
     yacc = ModelaYacc()
     yacc.build()
+    parser.tokenize("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
+    yacc.parser.parse("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
     parser.tokenize("preprocessing WITH SCALING USING min_max")
     yacc.parser.parse("preprocessing WITH scaling USING min_max")
 

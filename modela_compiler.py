@@ -86,15 +86,18 @@ class ModelaYacc:
 
         params = {"set": t}
         factory = ExecutorFactory()
-        executor = factory.getExecutor("SET", params)
+        executor = factory.get_executor("SET", params)
         names_dict = executor.execute()
         self.names["".join(names_dict.keys())] = names_dict["".join(names_dict.keys())]
 
     def p_statement_preprocessing(self, t):
         '''expression : PREPROCESSING WITH TASK USING ALGORITHM'''
-        t[0] = f"{t[1]} {t[2]} {t[3]} {t[4]} {t[5]}"
-        print(t[0])
-        print("PREPROCESSING WITH TASK USING ALGORITHM")
+        params = {"task": t[3], "command_type": t[5], "df": self.data}
+        print(params)
+        factory = ExecutorFactory()
+        executor = factory.get_executor("PREPROCESSING", params)
+        self.data = executor.execute()
+        print(self.data)
 
     def p_statement_load_data(self, t):
         '''expression : LOAD DATA FROM FILE'''
@@ -102,13 +105,13 @@ class ModelaYacc:
         work_dir = self.names.get("WORKING_DIRECTORY") or ""
         params = {"file_name": t[4], "work_directory": work_dir}
         factory = ExecutorFactory()
-        executor = factory.getExecutor("LOAD_DATA_FROM_FILE", params)
+        executor = factory.get_executor("LOAD_DATA_FROM_FILE", params)
         self.data = executor.execute()
         print(self.data)
 
     def __init__(self):
         self.data = pd.DataFrame()
-        self.names = {}
+        self.names = {"data": self.data}
         self.parser = None
 
     def build(self, **kwargs):
