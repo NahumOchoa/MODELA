@@ -1,9 +1,12 @@
 import abc
 import re
-from typing import Any, Dict, Union
+from typing import Any, Dict
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
+import config
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+from scipy.stats import boxcox
 
 
 class AbstractExecutor(abc.ABC):
@@ -79,12 +82,13 @@ class SetExecutor(AbstractExecutor):
 
 class MinMaxExecutor(AbstractExecutor):
     # Execute the MinMaxScaler preprocessing command
-    def __init__(self, df: DataFrame):
+    def __init__(self, df: DataFrame, cols):
         """
         Constructor for the MinMaxExecutor class that receives the DataFrame to preprocess
         :param df: The DataFrame to preprocess
         """
         self.df = df
+        self.cols = cols
 
     def execute(self) -> pd.DataFrame:
         """
@@ -92,43 +96,74 @@ class MinMaxExecutor(AbstractExecutor):
         :return: The preprocessed DataFrame
         """
         scaler = MinMaxScaler()
+
         return pd.DataFrame(scaler.fit_transform(self.df), columns=self.df.columns)
 
 
-class GaussianExecutor(AbstractExecutor):
-    # Execute the GaussianScaler preprocessing command
-    def __init__(self, df: DataFrame):
+class StandardGaussianExecutor(AbstractExecutor):
+    # Execute the StandardScaler and GaussianTransformer preprocessing command
+    def __init__(self, df: DataFrame, cols):
         """
-        Constructor for the GaussianExecutor class that receives the DataFrame to preprocess
+        Constructor for the StandardGaussianExecutor class that receives the DataFrame to preprocess
         :param df: The DataFrame to preprocess
+        :param cols: A list of columns to apply the preprocessing on
         """
         self.df = df
+        self.cols = cols
 
     def execute(self) -> pd.DataFrame:
         """
-        Execute the GaussianScaler preprocessing command and return the preprocessed DataFrame
+        Execute the StandardScaler and GaussianTransformer preprocessing command and return the preprocessed DataFrame
         :return: The preprocessed DataFrame
         """
+        # StandardScaler
         scaler = StandardScaler()
-        return pd.DataFrame(scaler.fit_transform(self.df), columns=self.df.columns)
+        scaled_cols = scaler.fit_transform(self.df[self.cols])
+
+        # GaussianTransformer
+        transformed_cols = []
+        for col in scaled_cols.T:
+            _, lmbda = boxcox(col + 1 - min(col))
+            transformed_col = ((col + 1 - min(col)) ** (-lmbda) - 1) / lmbda
+            transformed_cols.append(transformed_col)
+
+        transformed_cols = np.array(transformed_cols).T
+        transformed_cols = pd.DataFrame(transformed_cols, columns=self.cols)
+
+        # Concatenate with the remaining columns
+        explanatory_variables = pd.concat([self.df.drop(self.cols, axis=1), transformed_cols], axis=1)
+
+        return explanatory_variables
 
 
 class OneHotExecutor(AbstractExecutor):
     # Execute the OneHotEncoder preprocessing command
-    def __init__(self, df: DataFrame):
+    def __init__(self, df: DataFrame, cols):
         """
         Constructor for the OneHotExecutor class that receives the DataFrame to preprocess
+        and the columns to one-hot-encode
         :param df: The DataFrame to preprocess
+        :param cols: The list of columns to one-hot-encode
         """
         self.df = df
+        self.cols = cols
 
     def execute(self) -> pd.DataFrame:
         """
         Execute the OneHotEncoder preprocessing command and return the preprocessed DataFrame
         :return: The preprocessed DataFrame
         """
-        encoder = OneHotEncoder()
-        return pd.DataFrame(encoder.fit_transform(self.df).toarray(), columns=self.df.columns)
+        enc = OneHotEncoder()
+        for col in self.cols:
+            enc.fit(np.array(self.df[col]).reshape(-1, 1))
+            encoded_col = enc.transform(np.array(self.df[col]).reshape(-1, 1)).toarray()
+            encoded_col = pd.DataFrame(encoded_col)
+            # Rename the columns of the one-hot-encoded feature
+            encoded_col.columns = [col + '_' + str(i) for i in range(encoded_col.shape[1])]
+            self.df = pd.concat([self.df, encoded_col], axis=1)
+        # Remove the original columns that were one-hot-encoded
+        self.df.drop(columns=self.cols, inplace=True)
+        return self.df
 
 
 class ExecutorFactory:
@@ -161,9 +196,15 @@ class ExecutorFactory:
                 raise ValueError("Missing set parameter in SET command.")
             return SetExecutor(set_cmd)
         elif command_type == "PREPROCESSING":
-            task = parameters.get('task')
-            command_type = parameters.get('command_type')
+            input_command = parameters.get('input_command')
             df = parameters.get('df')
+            match = re.match(config.t_USING_PATTERN, input_command)
+            if match:
+                task = match.group(1)
+                command_type = match.group(2)
+                cols = match.group(3).split(',')
+            else:
+                raise ValueError("Invalid preprocessing command.")
             if task is None:
                 raise ValueError("Missing task parameter in PREPROCESSING command.")
             if command_type is None:
@@ -171,15 +212,15 @@ class ExecutorFactory:
             if df is None:
                 raise ValueError("Missing df parameter in PREPROCESSING command.")
             if task.lower() == "scaling":
-                return self.get_scale_preprocessor(command_type, df)
+                return self.get_scale_preprocessor(command_type, df, cols)
             elif task.lower() == "encoding":
-                return self.get_encode_preprocessor(command_type, df)
+                return self.get_encode_preprocessor(command_type, df, cols)
             else:
                 raise ValueError(f"Invalid preprocessing command: {command_type}")
         else:
             raise ValueError(f"Unknown command type {command_type}")
 
-    def get_scale_preprocessor(self, command_type: str, df: DataFrame) -> AbstractExecutor:
+    def get_scale_preprocessor(self, command_type: str, df: DataFrame, cols) -> AbstractExecutor:
         """
         Get the scale preprocessor for the command type and DataFrame received
         :param command_type: The type of the command
@@ -187,13 +228,14 @@ class ExecutorFactory:
         :return: The scale preprocessor for the command
         """
         if command_type.lower() == "min_max":
-            return MinMaxExecutor(df)
+            print(type(cols))
+            return MinMaxExecutor(df, cols)
         elif command_type.lower() == "gaussian":
-            return GaussianExecutor(df)
+            return StandardGaussianExecutor(df, cols)
         else:
             raise ValueError(f"Invalid preprocessing command: {command_type}")
 
-    def get_encode_preprocessor(self, command_type: str, df: DataFrame) -> AbstractExecutor:
+    def get_encode_preprocessor(self, command_type: str, df: DataFrame, cols) -> AbstractExecutor:
         """
         Get the encode preprocessor for the command type and DataFrame received
         :param command_type: The type of the command
@@ -201,6 +243,6 @@ class ExecutorFactory:
         :return: The encode preprocessor for the command
         """
         if command_type.lower() == "one_hot":
-            return OneHotExecutor(df)
+            return OneHotExecutor(df, cols)
         else:
             raise ValueError(f"Invalid preprocessing command: {command_type}")

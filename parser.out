@@ -2,8 +2,10 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
+    ALGORITHM
     DO
     SPECIAL_CHARACTERS
+    TASK
     TRANSFORMATION
     URL
 
@@ -16,12 +18,12 @@ Rule 3     expression -> STRING
 Rule 4     expression -> NAME
 Rule 5     assign -> NAME EQUALS expression
 Rule 6     assign -> assign NAME EQUALS expression
-Rule 7     expression -> PREPROCESSING WITH TASK USING ALGORITHM
+Rule 7     expression -> PREPROCESSING USING
 Rule 8     expression -> LOAD DATA FROM FILE
 
 Terminals, with rules where they appear
 
-ALGORITHM            : 7
+ALGORITHM            : 
 DATA                 : 8
 DO                   : 
 EQUALS               : 5 6
@@ -34,11 +36,10 @@ PREPROCESSING        : 7
 SETTER               : 2
 SPECIAL_CHARACTERS   : 
 STRING               : 3
-TASK                 : 7
+TASK                 : 
 TRANSFORMATION       : 
 URL                  : 
 USING                : 7
-WITH                 : 7
 error                : 
 
 Nonterminals, with rules where they appear
@@ -55,7 +56,7 @@ state 0
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (7) expression -> . PREPROCESSING USING
     (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
@@ -109,9 +110,9 @@ state 5
 
 state 6
 
-    (7) expression -> PREPROCESSING . WITH TASK USING ALGORITHM
+    (7) expression -> PREPROCESSING . USING
 
-    WITH            shift and go to state 10
+    USING           shift and go to state 10
 
 
 state 7
@@ -142,23 +143,24 @@ state 9
 
 state 10
 
-    (7) expression -> PREPROCESSING WITH . TASK USING ALGORITHM
+    (7) expression -> PREPROCESSING USING .
 
-    TASK            shift and go to state 14
+    $end            reduce using rule 7 (expression -> PREPROCESSING USING .)
+    NAME            reduce using rule 7 (expression -> PREPROCESSING USING .)
 
 
 state 11
 
     (8) expression -> LOAD DATA . FROM FILE
 
-    FROM            shift and go to state 15
+    FROM            shift and go to state 14
 
 
 state 12
 
     (6) assign -> assign NAME . EQUALS expression
 
-    EQUALS          shift and go to state 16
+    EQUALS          shift and go to state 15
 
 
 state 13
@@ -168,7 +170,7 @@ state 13
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (7) expression -> . PREPROCESSING USING
     (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
@@ -178,30 +180,23 @@ state 13
     PREPROCESSING   shift and go to state 6
     LOAD            shift and go to state 7
 
-    expression                     shift and go to state 17
+    expression                     shift and go to state 16
 
 state 14
 
-    (7) expression -> PREPROCESSING WITH TASK . USING ALGORITHM
+    (8) expression -> LOAD DATA FROM . FILE
 
-    USING           shift and go to state 18
+    FILE            shift and go to state 17
 
 
 state 15
-
-    (8) expression -> LOAD DATA FROM . FILE
-
-    FILE            shift and go to state 19
-
-
-state 16
 
     (6) assign -> assign NAME EQUALS . expression
     (1) expression -> . NUMBER
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING WITH TASK USING ALGORITHM
+    (7) expression -> . PREPROCESSING USING
     (8) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
@@ -211,9 +206,9 @@ state 16
     PREPROCESSING   shift and go to state 6
     LOAD            shift and go to state 7
 
-    expression                     shift and go to state 20
+    expression                     shift and go to state 18
 
-state 17
+state 16
 
     (5) assign -> NAME EQUALS expression .
 
@@ -221,14 +216,7 @@ state 17
     $end            reduce using rule 5 (assign -> NAME EQUALS expression .)
 
 
-state 18
-
-    (7) expression -> PREPROCESSING WITH TASK USING . ALGORITHM
-
-    ALGORITHM       shift and go to state 21
-
-
-state 19
+state 17
 
     (8) expression -> LOAD DATA FROM FILE .
 
@@ -236,20 +224,12 @@ state 19
     NAME            reduce using rule 8 (expression -> LOAD DATA FROM FILE .)
 
 
-state 20
+state 18
 
     (6) assign -> assign NAME EQUALS expression .
 
     NAME            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
     $end            reduce using rule 6 (assign -> assign NAME EQUALS expression .)
-
-
-state 21
-
-    (7) expression -> PREPROCESSING WITH TASK USING ALGORITHM .
-
-    $end            reduce using rule 7 (expression -> PREPROCESSING WITH TASK USING ALGORITHM .)
-    NAME            reduce using rule 7 (expression -> PREPROCESSING WITH TASK USING ALGORITHM .)
 
 WARNING: 
 WARNING: Conflicts:

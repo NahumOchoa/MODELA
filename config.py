@@ -13,10 +13,9 @@ tokens = [
         'URL',
         'TRANSFORMATION',
         'PREPROCESSING',
-        'WITH',
-        'USING',
         'ALGORITHM',
         'TASK',
+        'USING',
     ]
 
 # General purpose strings
@@ -40,8 +39,6 @@ t_DATA = r'data|DATA'
 t_TASK = r'SCALING|ENCODING|IMPUTATION|scaling|encoding|imputation'
 t_ALGORITHM = r'min_max|gaussian|one_hot|simple_imputer|MIN_MAX|GAUSSIAN|ONE_HOT|SIMPLE_IMPUTER'
 t_PREPROCESSING = r'PREPROCESSING|preprocessing'
-t_WITH = r'WITH|with'
-t_USING = r'USING|using'
 t_NAME = r'(?!(' + NO_NAMES+'))(?!(' + t_ALGORITHM +'))(?!(' + t_PREPROCESSING +'))[a-zA-Z_0-9\-]+'
-
-
+t_USING = r'USING\(type=(' + t_TASK + ')\,?(\s*)method=(' + t_ALGORITHM + ')\,?(\s*)cols=\[[\w\d\-\_\']+(\s*\,\s*[\w\d\-\_\']+)*\](\s*)\)'
+t_USING_PATTERN = r'USING\(type=(\w+),\s*method=(\w+),\s*cols=\[(.*)\]\)'

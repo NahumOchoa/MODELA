@@ -28,7 +28,6 @@ class ModelaLexer:
     t_TASK = config.t_TASK
     t_ALGORITHM = config.t_ALGORITHM
     t_PREPROCESSING = config.t_PREPROCESSING
-    t_WITH = config.t_WITH
     t_USING = config.t_USING
 
     def t_NUMBER(self, t):
@@ -91,9 +90,8 @@ class ModelaYacc:
         self.names["".join(names_dict.keys())] = names_dict["".join(names_dict.keys())]
 
     def p_statement_preprocessing(self, t):
-        '''expression : PREPROCESSING WITH TASK USING ALGORITHM'''
-        params = {"task": t[3], "command_type": t[5], "df": self.data}
-        print(params)
+        '''expression : PREPROCESSING USING'''
+        params = {"input_command": t[2], "df": self.data}
         factory = ExecutorFactory()
         executor = factory.get_executor("PREPROCESSING", params)
         self.data = executor.execute()

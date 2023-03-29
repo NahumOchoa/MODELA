@@ -16,8 +16,8 @@ def main():
     yacc.build()
     parser.tokenize("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
     yacc.parser.parse("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
-    parser.tokenize("preprocessing WITH SCALING USING min_max")
-    yacc.parser.parse("preprocessing WITH scaling USING min_max")
+    parser.tokenize("preprocessing USING(type=encoding, method=one_hot, cols=[test3,test4])")
+    yacc.parser.parse("preprocessing USING(type=encoding, method=one_hot, cols=[test3,test4])")
 
 
 if __name__ == "__main__":
