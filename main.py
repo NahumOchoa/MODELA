@@ -26,11 +26,6 @@ def main():
             continue
         parser.input(s)
         yacc.parser.parse(s)
-    parser.tokenize("LOAD DATA FROM FILE(source='Allstate-cost-cleaned.csv', type=csv)")
-    yacc.parser.parse("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
-    parser.tokenize("PREPROCESSING(type=encoding, method=one_hot, cols=[test3,test4])")
-    yacc.parser.parse("preprocessing USING(type=encoding, method=one_hot, cols=[test3,test4])")
-
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
