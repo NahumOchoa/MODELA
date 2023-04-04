@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'ALGORITHM DATA DO EQUALS FILE FROM LOAD NAME NUMBER PREPROCESSING SETTER SPECIAL_CHARACTERS STRING TASK TRANSFORMATION URL USINGexpression : NUMBERexpression : SETTER assignexpression : STRINGexpression : NAMEassign : NAME EQUALS expression\n                  | assign NAME EQUALS expressionexpression : PREPROCESSING USINGexpression : LOAD DATA FROM FILE'
+_lr_signature = 'ALGORITHM DATA DO EQUALS FILE FROM LEARNER LOAD MODEL NAME NUMBER PREPROCESSING SETTER SPECIAL_CHARACTERS STRING TASK TRANSFORMATION TYPE_MODEL URLexpression : NUMBERexpression : SETTER assignexpression : STRINGexpression : NAMEassign : NAME EQUALS expression\n                  | assign NAME EQUALS expressionexpression : PREPROCESSINGexpression : MODELexpression : LOAD DATA FROM FILE'
     
-_lr_action_items = {'NUMBER':([0,13,15,],[2,2,2,]),'SETTER':([0,13,15,],[3,3,3,]),'STRING':([0,13,15,],[4,4,4,]),'NAME':([0,2,3,4,5,8,10,13,15,16,17,18,],[5,-1,9,-3,-4,12,-7,5,5,-5,-8,-6,]),'PREPROCESSING':([0,13,15,],[6,6,6,]),'LOAD':([0,13,15,],[7,7,7,]),'$end':([1,2,4,5,8,10,16,17,18,],[0,-1,-3,-4,-2,-7,-5,-8,-6,]),'USING':([6,],[10,]),'DATA':([7,],[11,]),'EQUALS':([9,12,],[13,15,]),'FROM':([11,],[14,]),'FILE':([14,],[17,]),}
+_lr_action_items = {'NUMBER':([0,13,15,],[2,2,2,]),'SETTER':([0,13,15,],[3,3,3,]),'STRING':([0,13,15,],[4,4,4,]),'NAME':([0,2,3,4,5,6,7,9,13,15,16,17,18,],[5,-1,10,-3,-4,-7,-8,12,5,5,-5,-9,-6,]),'PREPROCESSING':([0,13,15,],[6,6,6,]),'MODEL':([0,13,15,],[7,7,7,]),'LOAD':([0,13,15,],[8,8,8,]),'$end':([1,2,4,5,6,7,9,16,17,18,],[0,-1,-3,-4,-7,-8,-2,-5,-9,-6,]),'DATA':([8,],[11,]),'EQUALS':([10,12,],[13,15,]),'FROM':([11,],[14,]),'FILE':([14,],[17,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'expression':([0,13,15,],[1,16,18,]),'assign':([3,],[8,]),}
+_lr_goto_items = {'expression':([0,13,15,],[1,16,18,]),'assign':([3,],[9,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,12 +27,13 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> expression","S'",1,None,None,None),
-  ('expression -> NUMBER','expression',1,'p_expression_number','modela_compiler.py',60),
-  ('expression -> SETTER assign','expression',2,'p_expression_setter','modela_compiler.py',65),
-  ('expression -> STRING','expression',1,'p_expression_string','modela_compiler.py',69),
-  ('expression -> NAME','expression',1,'p_expression_name','modela_compiler.py',74),
-  ('assign -> NAME EQUALS expression','assign',3,'p_statement_assign','modela_compiler.py',83),
-  ('assign -> assign NAME EQUALS expression','assign',4,'p_statement_assign','modela_compiler.py',84),
-  ('expression -> PREPROCESSING USING','expression',2,'p_statement_preprocessing','modela_compiler.py',93),
-  ('expression -> LOAD DATA FROM FILE','expression',4,'p_statement_load_data','modela_compiler.py',103),
+  ('expression -> NUMBER','expression',1,'p_expression_number','modela_compiler.py',70),
+  ('expression -> SETTER assign','expression',2,'p_expression_setter','modela_compiler.py',75),
+  ('expression -> STRING','expression',1,'p_expression_string','modela_compiler.py',79),
+  ('expression -> NAME','expression',1,'p_expression_name','modela_compiler.py',84),
+  ('assign -> NAME EQUALS expression','assign',3,'p_statement_assign','modela_compiler.py',93),
+  ('assign -> assign NAME EQUALS expression','assign',4,'p_statement_assign','modela_compiler.py',94),
+  ('expression -> PREPROCESSING','expression',1,'p_statement_preprocessing','modela_compiler.py',103),
+  ('expression -> MODEL','expression',1,'p_statement_model','modela_compiler.py',112),
+  ('expression -> LOAD DATA FROM FILE','expression',4,'p_statement_load_data','modela_compiler.py',121),
 ]

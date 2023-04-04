@@ -14,7 +14,7 @@ class ModelaLexer:
     # Token Definitions
     t_SPECIAL_CHARACTERS = config.t_SPECIAL_CHARACTERS
     t_ignore_SPACE = config.t_ignore_SPACE
-    t_NAME = config.t_NAME
+
     t_URL = config.t_URL
     t_EQUALS = config.t_EQUALS
     t_STRING = config.t_STRING
@@ -28,29 +28,37 @@ class ModelaLexer:
     t_TASK = config.t_TASK
     t_ALGORITHM = config.t_ALGORITHM
     t_PREPROCESSING = config.t_PREPROCESSING
-    t_USING = config.t_USING
+    t_TYPE_MODEL = config.t_TYPE_MODEL
+    t_LEARNER = config.t_LEARNER
+    t_MODEL = config.t_MODEL
 
     def t_NUMBER(self, t):
         r"""\d+"""
         t.value = int(t.value)
         return t
 
+    def t_NAME(self, t):
+        r'(?!(set|SET|from|FROM|do|DO|load|LOAD|data|DATA|MODEL|model|WITH|with|FILE|file|SCALING|ENCODING|IMPUTATION|scaling|encoding|imputation|PREPROCESSING|preprocessing|min_max|gaussian|one_hot|simple_imputer|MIN_MAX|GAUSSIAN|ONE_HOT|SIMPLE_IMPUTER))[a-zA-Z_0-9\-]+'
+        t.value = str(t.value)
+        return t
+
     def t_error(self, t):
-        print("Caracter no valido %s en la linea %s" % (t.value[0], t.lexer.lineno))
+        print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
     def __init__(self):
-        self.lexer = lex.lex(module=self, debug=0)
+        self.lexer = None
+
+    def build(self, **kwargs):
+        self.lexer = lex.lex(module=self, **kwargs, debug=1)
+
+    def input(self, data: str):
+        self.lexer.input(data)
 
     def tokenize(self, data):
         self.lexer.input(data)
         for token in self.lexer:
             print(token)
-
-
-def p_expression_setter(t):
-    'expression : SETTER assign'
-    print(str(t[1]) + ' ' + str(t[2]))
 
 
 class ModelaYacc:
@@ -73,8 +81,8 @@ class ModelaYacc:
     def p_expression_name(self, t):
         'expression : NAME'
         try:
-            print(str(t[1]))
             t[0] = self.names[t[1]]
+            print(f"{t[1]}: {t[0]}")
         except LookupError:
             print("Undefined name '%s'" % t[1])
             t[0] = 0
@@ -90,16 +98,23 @@ class ModelaYacc:
         self.names["".join(names_dict.keys())] = names_dict["".join(names_dict.keys())]
 
     def p_statement_preprocessing(self, t):
-        '''expression : PREPROCESSING USING'''
-        params = {"input_command": t[2], "df": self.data}
+        '''expression : PREPROCESSING'''
+        print(t[1])
+        params = {"input_command": t[1], "df": self.data}
         factory = ExecutorFactory()
         executor = factory.get_executor("PREPROCESSING", params)
         self.data = executor.execute()
         print(self.data)
 
+    def p_statement_model(self, t):
+        '''expression : MODEL'''
+        params = {"input_command": t[1], "df": self.data}
+        factory = ExecutorFactory()
+        executor = factory.get_executor("MODEL", params)
+        self.data = executor.execute()
+
     def p_statement_load_data(self, t):
         '''expression : LOAD DATA FROM FILE'''
-
         work_dir = self.names.get("WORKING_DIRECTORY") or ""
         params = {"file_name": t[4], "work_directory": work_dir}
         factory = ExecutorFactory()
@@ -109,7 +124,7 @@ class ModelaYacc:
 
     def __init__(self):
         self.data = pd.DataFrame()
-        self.names = {"data": self.data}
+        self.names = {"test": self.data}
         self.parser = None
 
     def build(self, **kwargs):

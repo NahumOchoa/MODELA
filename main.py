@@ -14,9 +14,21 @@ def main():
     parser = ModelaLexer()
     yacc = ModelaYacc()
     yacc.build()
-    parser.tokenize("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
+    parser.build()
+    while True:
+        try:
+            s = input('modela > ')
+            if s == 'exit' or s == 'quit':
+                break
+        except EOFError:
+            break
+        if not s:
+            continue
+        parser.input(s)
+        yacc.parser.parse(s)
+    parser.tokenize("LOAD DATA FROM FILE(source='Allstate-cost-cleaned.csv', type=csv)")
     yacc.parser.parse("LOAD DATA FROM FILE(source='prueba.csv', type=csv)")
-    parser.tokenize("preprocessing USING(type=encoding, method=one_hot, cols=[test3,test4])")
+    parser.tokenize("PREPROCESSING(type=encoding, method=one_hot, cols=[test3,test4])")
     yacc.parser.parse("preprocessing USING(type=encoding, method=one_hot, cols=[test3,test4])")
 
 

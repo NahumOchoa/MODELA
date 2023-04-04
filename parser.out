@@ -4,9 +4,11 @@ Unused terminals:
 
     ALGORITHM
     DO
+    LEARNER
     SPECIAL_CHARACTERS
     TASK
     TRANSFORMATION
+    TYPE_MODEL
     URL
 
 Grammar
@@ -18,18 +20,21 @@ Rule 3     expression -> STRING
 Rule 4     expression -> NAME
 Rule 5     assign -> NAME EQUALS expression
 Rule 6     assign -> assign NAME EQUALS expression
-Rule 7     expression -> PREPROCESSING USING
-Rule 8     expression -> LOAD DATA FROM FILE
+Rule 7     expression -> PREPROCESSING
+Rule 8     expression -> MODEL
+Rule 9     expression -> LOAD DATA FROM FILE
 
 Terminals, with rules where they appear
 
 ALGORITHM            : 
-DATA                 : 8
+DATA                 : 9
 DO                   : 
 EQUALS               : 5 6
-FILE                 : 8
-FROM                 : 8
-LOAD                 : 8
+FILE                 : 9
+FROM                 : 9
+LEARNER              : 
+LOAD                 : 9
+MODEL                : 8
 NAME                 : 4 5 6
 NUMBER               : 1
 PREPROCESSING        : 7
@@ -38,8 +43,8 @@ SPECIAL_CHARACTERS   :
 STRING               : 3
 TASK                 : 
 TRANSFORMATION       : 
+TYPE_MODEL           : 
 URL                  : 
-USING                : 7
 error                : 
 
 Nonterminals, with rules where they appear
@@ -56,15 +61,17 @@ state 0
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING USING
-    (8) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING
+    (8) expression -> . MODEL
+    (9) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
     PREPROCESSING   shift and go to state 6
-    LOAD            shift and go to state 7
+    MODEL           shift and go to state 7
+    LOAD            shift and go to state 8
 
     expression                     shift and go to state 1
 
@@ -88,9 +95,9 @@ state 3
     (5) assign -> . NAME EQUALS expression
     (6) assign -> . assign NAME EQUALS expression
 
-    NAME            shift and go to state 9
+    NAME            shift and go to state 10
 
-    assign                         shift and go to state 8
+    assign                         shift and go to state 9
 
 state 4
 
@@ -110,19 +117,28 @@ state 5
 
 state 6
 
-    (7) expression -> PREPROCESSING . USING
+    (7) expression -> PREPROCESSING .
 
-    USING           shift and go to state 10
+    $end            reduce using rule 7 (expression -> PREPROCESSING .)
+    NAME            reduce using rule 7 (expression -> PREPROCESSING .)
 
 
 state 7
 
-    (8) expression -> LOAD . DATA FROM FILE
+    (8) expression -> MODEL .
+
+    $end            reduce using rule 8 (expression -> MODEL .)
+    NAME            reduce using rule 8 (expression -> MODEL .)
+
+
+state 8
+
+    (9) expression -> LOAD . DATA FROM FILE
 
     DATA            shift and go to state 11
 
 
-state 8
+state 9
 
     (2) expression -> SETTER assign .
     (6) assign -> assign . NAME EQUALS expression
@@ -134,24 +150,16 @@ state 8
   ! NAME            [ reduce using rule 2 (expression -> SETTER assign .) ]
 
 
-state 9
+state 10
 
     (5) assign -> NAME . EQUALS expression
 
     EQUALS          shift and go to state 13
 
 
-state 10
-
-    (7) expression -> PREPROCESSING USING .
-
-    $end            reduce using rule 7 (expression -> PREPROCESSING USING .)
-    NAME            reduce using rule 7 (expression -> PREPROCESSING USING .)
-
-
 state 11
 
-    (8) expression -> LOAD DATA . FROM FILE
+    (9) expression -> LOAD DATA . FROM FILE
 
     FROM            shift and go to state 14
 
@@ -170,21 +178,23 @@ state 13
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING USING
-    (8) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING
+    (8) expression -> . MODEL
+    (9) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
     PREPROCESSING   shift and go to state 6
-    LOAD            shift and go to state 7
+    MODEL           shift and go to state 7
+    LOAD            shift and go to state 8
 
     expression                     shift and go to state 16
 
 state 14
 
-    (8) expression -> LOAD DATA FROM . FILE
+    (9) expression -> LOAD DATA FROM . FILE
 
     FILE            shift and go to state 17
 
@@ -196,15 +206,17 @@ state 15
     (2) expression -> . SETTER assign
     (3) expression -> . STRING
     (4) expression -> . NAME
-    (7) expression -> . PREPROCESSING USING
-    (8) expression -> . LOAD DATA FROM FILE
+    (7) expression -> . PREPROCESSING
+    (8) expression -> . MODEL
+    (9) expression -> . LOAD DATA FROM FILE
 
     NUMBER          shift and go to state 2
     SETTER          shift and go to state 3
     STRING          shift and go to state 4
     NAME            shift and go to state 5
     PREPROCESSING   shift and go to state 6
-    LOAD            shift and go to state 7
+    MODEL           shift and go to state 7
+    LOAD            shift and go to state 8
 
     expression                     shift and go to state 18
 
@@ -218,10 +230,10 @@ state 16
 
 state 17
 
-    (8) expression -> LOAD DATA FROM FILE .
+    (9) expression -> LOAD DATA FROM FILE .
 
-    $end            reduce using rule 8 (expression -> LOAD DATA FROM FILE .)
-    NAME            reduce using rule 8 (expression -> LOAD DATA FROM FILE .)
+    $end            reduce using rule 9 (expression -> LOAD DATA FROM FILE .)
+    NAME            reduce using rule 9 (expression -> LOAD DATA FROM FILE .)
 
 
 state 18
@@ -234,4 +246,4 @@ state 18
 WARNING: 
 WARNING: Conflicts:
 WARNING: 
-WARNING: shift/reduce conflict for NAME in state 8 resolved as shift
+WARNING: shift/reduce conflict for NAME in state 9 resolved as shift

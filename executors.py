@@ -1,12 +1,16 @@
 import abc
 import re
 from typing import Any, Dict
-import pandas as pd
-from pandas import DataFrame
+
 import numpy as np
-import config
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+import pandas as pd
+import statsmodels.formula.api as smf
+from pandas import DataFrame
 from scipy.stats import boxcox
+from sklearn import preprocessing
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+
+import config
 
 
 class AbstractExecutor(abc.ABC):
@@ -124,23 +128,12 @@ class StandardGaussianExecutor(AbstractExecutor):
         :return: The preprocessed DataFrame
         """
         # StandardScaler
-        scaler = StandardScaler()
-        scaled_cols = scaler.fit_transform(self.df[self.cols])
+        scaler = preprocessing.StandardScaler()
+        for col in self.cols:
+            scaled_col = scaler.fit_transform(np.array(self.df[col]).reshape(-1, 1))
+            self.df[col] = pd.DataFrame(scaled_col, columns=[col])
 
-        # GaussianTransformer
-        transformed_cols = []
-        for col in scaled_cols.T:
-            _, lmbda = boxcox(col + 1 - min(col))
-            transformed_col = ((col + 1 - min(col)) ** (-lmbda) - 1) / lmbda
-            transformed_cols.append(transformed_col)
-
-        transformed_cols = np.array(transformed_cols).T
-        transformed_cols = pd.DataFrame(transformed_cols, columns=self.cols)
-
-        # Concatenate with the remaining columns
-        explanatory_variables = pd.concat([self.df.drop(self.cols, axis=1), transformed_cols], axis=1)
-
-        return explanatory_variables
+        return self.df
 
 
 class OneHotExecutor(AbstractExecutor):
@@ -173,6 +166,68 @@ class OneHotExecutor(AbstractExecutor):
         return self.df
 
 
+class LinearRegressionExecutor(AbstractExecutor):
+    # Execute the LinearRegression command
+    def __init__(self, df: DataFrame, formula: str):
+        """
+        Constructor for the LinearRegressionExecutor class that receives the DataFrame to preprocess
+        and the columns to one-hot-encode
+        :param df: The DataFrame to preprocess
+        :param explanatory_variables: The list of explanatory variables
+        :param response_variable: The response variable
+        """
+        self.df = df
+        self.formula = formula
+
+    def execute(self) -> pd.DataFrame:
+        """
+        Execute the LinearRegression command and return the preprocessed DataFrame
+        :return: The preprocessed DataFrame
+        """
+        # Split the formula into explanatory variables and response variable
+        formula = f"""{self.formula}"""
+        model = smf.ols(formula=formula, data=self.df)
+        fitted = model.fit()
+        summary = fitted.summary()
+        # Extrae los coeficientes, p-values, R-Squared y MSE del resumen
+        coef_pattern = re.compile(
+            r'(\b[A-Z]\d?\b)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)')
+        coef_lines = re.findall(coef_pattern, summary.tables[1].as_text())
+
+        # Crea un diccionario para almacenar los resultados
+        results = {}
+
+        # Agrega los coeficientes, p-values, R-Squared y MSE al diccionario
+        for line in coef_lines:
+            var_name = line[0]
+            results[var_name] = {
+                'coef': float(line[1]),
+                'std_err': float(line[2]),
+                't_stat': float(line[3]),
+                'p_value': float(line[4])
+            }
+
+        results['R-Squared'] = {
+            'value': fitted.rsquared,
+            'adj_value': fitted.rsquared_adj
+        }
+
+        results['MSE'] = {
+            'value': fitted.mse_resid,
+            'nobs': fitted.nobs
+        }
+
+        # Imprime los resultados
+        for var, vals in results.items():
+            if 'coef' in vals:
+                print(f'{var}: Coef={vals["coef"]}, p-value={vals["p_value"]}')
+            elif 'value' in vals:
+                print(f'{var}: {vals["value"]}')
+
+        print(fitted.summary())
+        return self.df
+
+
 class ExecutorFactory:
     # Factory to create the executors
     def __init__(self):
@@ -202,26 +257,49 @@ class ExecutorFactory:
             if set_cmd is None:
                 raise ValueError("Missing set parameter in SET command.")
             return SetExecutor(set_cmd)
+        elif command_type == "MODEL":
+            input_command = parameters.get('input_command')
+            df = parameters.get('df')
+            match = re.match(config.t_MODEL_PATTERN, input_command)
+            if match:
+                type = match.group(1)
+                command_type_mo = match.group(2)
+                formula = match.group(3)
+            else:
+                raise ValueError("Invalid MODEL command.")
+            if type is None:
+                raise ValueError("Missing type parameter in MODEL command.")
+            if command_type_mo is None:
+                raise ValueError("Missing command_type parameter in MODEL command.")
+            if formula is None:
+                raise ValueError("Missing formula parameter in MODEL command.")
+            if df is None:
+                raise ValueError("Missing df parameter in MODEL command.")
+            if type.lower() == "regression":
+                return self.get_regression_executor(command_type_mo, df, formula)
+
+            else:
+                raise ValueError(f"Invalid MODEL command{type}.")
         elif command_type == "PREPROCESSING":
             input_command = parameters.get('input_command')
             df = parameters.get('df')
-            match = re.match(config.t_USING_PATTERN, input_command)
+            match = re.match(config.t_PREPROCESSING_PATTERN, input_command)
             if match:
                 task = match.group(1)
-                command_type = match.group(2)
+                command_type_pre = match.group(2)
                 cols = match.group(3).split(',')
             else:
                 raise ValueError("Invalid preprocessing command.")
             if task is None:
                 raise ValueError("Missing task parameter in PREPROCESSING command.")
-            if command_type is None:
+            if command_type_pre is None:
                 raise ValueError("Missing command_type parameter in PREPROCESSING command.")
             if df is None:
                 raise ValueError("Missing df parameter in PREPROCESSING command.")
             if task.lower() == "scaling":
-                return self.get_scale_preprocessor(command_type, df, cols)
+                return self.get_scale_preprocessor(command_type_pre, df, cols)
             elif task.lower() == "encoding":
-                return self.get_encode_preprocessor(command_type, df, cols)
+                return self.get_encode_preprocessor(command_type_pre, df, cols)
             else:
                 raise ValueError(f"Invalid preprocessing command: {command_type}")
         else:
@@ -236,7 +314,6 @@ class ExecutorFactory:
         :return: The scale preprocessor for the command
         """
         if command_type.lower() == "min_max":
-            print(type(cols))
             return MinMaxExecutor(df, cols)
         elif command_type.lower() == "gaussian":
             return StandardGaussianExecutor(df, cols)
@@ -255,3 +332,16 @@ class ExecutorFactory:
             return OneHotExecutor(df, cols)
         else:
             raise ValueError(f"Invalid preprocessing command: {command_type}")
+
+    def get_regression_executor(self, command_type: str, df: DataFrame, formula: str) -> AbstractExecutor:
+        """
+        Get the regression executor for the command type and DataFrame received
+        :param command_type: The type of the command
+        :param df: The DataFrame to preprocess
+        :param formula: The formula for the regression
+        :return: The regression executor for the command
+        """
+        if command_type.lower() == "lr":
+            return LinearRegressionExecutor(df, formula)
+        else:
+            raise ValueError(f"Invalid regression command: {command_type}")
