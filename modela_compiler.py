@@ -71,7 +71,8 @@ class ModelaYacc:
 
     def p_expression_setter(self, t):
         'expression : SETTER assign'
-        print(str(t[1]) + ' ' + str(t[2]))
+        pass
+        #print(str(t[1]) + ' ' + str(t[2]))
 
     def p_expression_string(self, t):
         'expression : STRING'

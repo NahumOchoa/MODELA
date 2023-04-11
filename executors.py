@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from pandas import DataFrame
-from scipy.stats import boxcox
 from sklearn import preprocessing
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 import config
 
@@ -101,6 +100,12 @@ class MinMaxExecutor(AbstractExecutor):
         Execute the MinMaxScaler preprocessing command and return the preprocessed DataFrame
         :return: The preprocessed DataFrame
         """
+        if self.cols is None:
+            print("No columns specified for MinMaxScaler preprocessing.")
+            return self.df
+        if not self.df is None:
+            print("DataFrame is empty.")
+            return self.df
         scaler = MinMaxScaler()
         for col in self.cols:
             scaled_col = scaler.fit_transform(np.array(self.df[col]).reshape(-1, 1))
@@ -128,6 +133,12 @@ class StandardGaussianExecutor(AbstractExecutor):
         :return: The preprocessed DataFrame
         """
         # StandardScaler
+        if self.cols is None:
+            print("No columns specified for MinMaxScaler preprocessing.")
+            return self.df
+        if self.df.empty is None:
+            print("DataFrame is empty.")
+            return self.df
         scaler = preprocessing.StandardScaler()
         for col in self.cols:
             scaled_col = scaler.fit_transform(np.array(self.df[col]).reshape(-1, 1))
@@ -153,6 +164,12 @@ class OneHotExecutor(AbstractExecutor):
         Execute the OneHotEncoder preprocessing command and return the preprocessed DataFrame
         :return: The preprocessed DataFrame
         """
+        if self.cols is None:
+            print("No columns specified for MinMaxScaler preprocessing.")
+            return self.df
+        if self.df.empty is None:
+            print("DataFrame is empty.")
+            return self.df
         enc = OneHotEncoder()
         for col in self.cols:
             enc.fit(np.array(self.df[col]).reshape(-1, 1))
@@ -185,48 +202,17 @@ class LinearRegressionExecutor(AbstractExecutor):
         :return: The preprocessed DataFrame
         """
         # Split the formula into explanatory variables and response variable
+        if self.formula is None:
+            print("No formula specified for LinearRegression.")
+            return self.df
+        if self.df.empty is None:
+            print("DataFrame is empty.")
+            return self.df
         formula = f"""{self.formula}"""
         model = smf.ols(formula=formula, data=self.df)
         fitted = model.fit()
-        summary = fitted.summary()
-        # Extrae los coeficientes, p-values, R-Squared y MSE del resumen
-        coef_pattern = re.compile(
-            r'(\b[A-Z]\d?\b)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)\s+([\-\d\.]+)')
-        coef_lines = re.findall(coef_pattern, summary.tables[1].as_text())
-
-        # Crea un diccionario para almacenar los resultados
-        results = {}
-
-        # Agrega los coeficientes, p-values, R-Squared y MSE al diccionario
-        for line in coef_lines:
-            var_name = line[0]
-            results[var_name] = {
-                'coef': float(line[1]),
-                'std_err': float(line[2]),
-                't_stat': float(line[3]),
-                'p_value': float(line[4])
-            }
-
-        results['R-Squared'] = {
-            'value': fitted.rsquared,
-            'adj_value': fitted.rsquared_adj
-        }
-
-        results['MSE'] = {
-            'value': fitted.mse_resid,
-            'nobs': fitted.nobs
-        }
-
-        # Imprime los resultados
-        for var, vals in results.items():
-            if 'coef' in vals:
-                print(f'{var}: Coef={vals["coef"]}, p-value={vals["p_value"]}')
-            elif 'value' in vals:
-                print(f'{var}: {vals["value"]}')
-
         print(fitted.summary())
-        return self.df
-
+        return fitted
 
 class ExecutorFactory:
     # Factory to create the executors
